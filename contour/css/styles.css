@@ -1,0 +1,100 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: sans-serif; /* 1 */
+  -ms-text-size-adjust: 100%; /* 2 */
+  -webkit-text-size-adjust: 100%; /* 2 */
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+}
+
+.container {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+
+body {
+  background-color: #333;
+  display: table;
+  margin: 0;
+}
+
+header {
+  background-color: #455a64;
+  padding: 10px 20px;
+  font-size: 20px;
+  color: #fff;
+  position: absolute;
+}
+
+.main {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+}
+
+path{
+  -webkit-transition: stroke-dashoffset 2s ease-in-out;
+  transition: stroke-dashoffset 2s ease-in-out;
+}
+
+.main.dropped {
+  opacity: 0;
+}
+
+#droparea {
+  margin: 20px auto;
+  width: 80%;
+  padding: 50px;
+  text-align: center;
+  border: 10px solid #eee;
+  color: #fff;
+  border-radius: 5px;
+  border-style: dashed;
+  position: relative;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+.container {
+  position: relative;
+  text-align: center;
+}
+
+.container svg {
+  transition: opacity 1s ease-in-out;
+  position: absolute;
+  max-width: 100%;
+}
+
+.container img {
+  transition: opacity 1s ease-in-out;
+  max-width: 100%;
+}
+
+#image {
+  display: none;
+}
+
+#canvas {
+  display: none;
+}
+
+/* styles for the resulting svg */
+polyline {
+  stroke: #fff;
+  stroke-width: 1;
+  stroke-linecap: round;
+  opacity: 1;
+  stroke-dashoffset: 0;
+  fill: none;
+}

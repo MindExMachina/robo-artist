@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>contour - Draw edges from bitmap images using SVG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="author" href="https://plus.google.com/107456024651797783420" />
+  <meta name="description" content="A cool drawing effect using canny edge detection and animating SVG polylines to sketch images.">
+  <meta name="twitter:description" property="og:description" content="A cool drawing effect using canny edge detection and animating SVG polylines to sketch images.">
+  <meta name="twitter:title" property="og:title" content="contour - Draw edges from bitmap images using SVG<">
+  <link rel="stylesheet" href="css/styles.css">
+  <script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='//www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','UA-39254352-1');ga('send','pageview');</script>
+</head>
+<body>
+  <header>
+    contour
+  </header>
+  <div class="main">
+    <div id="droparea">Click, tap or drop image to start painting</div>
+  </div>
+  <div class="container">
+    <svg id="svg2" style="opacity:0"></svg>
+  </div>
+  <img src="http://nono.ma/img/u/366-rutas-salvajes-apricots.jpg">
+  <script src="js/pixel.js"></script>
+  <script src="js/canvas.js"></script>
+  <script src="js/canny.js"></script>
+  <script src="js/helpers.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/jquery-1.10.1.min.js"></script>
+  <script src="js/contour.js"></script>
+  <script src="js/image-provider.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
