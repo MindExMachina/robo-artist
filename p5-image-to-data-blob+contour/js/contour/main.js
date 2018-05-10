@@ -25,12 +25,9 @@ var DIRECTIONS = {
     SAME: 8
 };
 
-////////-------------------------------------
+// Adapted from image provider
+function setCaptureImage() {
 
-function setImg() {
-
-    console.log(img);
-    //dropAreaElement.classList.add('dropped');
     imageWidth = img.width;
     if (img.width > img.height) {
         resultWidth = Math.min(img.width, maxResolution);
@@ -53,14 +50,12 @@ function setImg() {
     }
 
     var polylines = document.querySelectorAll('#svg2 polyline');
+    // console.log('polylines.length' + polylines.length);
     if (polylines.length) {
         for (var i = 0; i < polylines.length; i++) {
             polylines[i].parentNode.removeChild(polylines[i]);
         }
     }
-
-    //document.querySelector('.container')
-    //   .appendChild(image);
 
     canvas.loadImg(img.src, 0, 0, resultWidth, resultHeight).then(process);
 }
@@ -83,11 +78,12 @@ function process() {
     contourFinder.init(canvas.getCanvas());
     contourFinder.findContours();
 
-    console.log('contourFinder.allContours.length): ' + contourFinder.allContours.length);
+    // console.log('contourFinder.allContours.length): ' + contourFinder.allContours.length);
     var secs = (Date.now() - startTime) / 1000;
-    console.log('Finding contours took ' + secs + 's');
+    // console.log('Finding contours took ' + secs + 's');
 
-    drawContours();
+    processContours(contourFinder);
+    //drawContours();
 }
 
 function findOutDirection(point1, point2) {
@@ -118,9 +114,18 @@ function findOutDirection(point1, point2) {
     }
 }
 
+
+// ███╗   ██╗ ██████╗ ████████╗    ██╗   ██╗███████╗███████╗██████╗ 
+// ████╗  ██║██╔═══██╗╚══██╔══╝    ██║   ██║██╔════╝██╔════╝██╔══██╗
+// ██╔██╗ ██║██║   ██║   ██║       ██║   ██║███████╗█████╗  ██║  ██║
+// ██║╚██╗██║██║   ██║   ██║       ██║   ██║╚════██║██╔══╝  ██║  ██║
+// ██║ ╚████║╚██████╔╝   ██║       ╚██████╔╝███████║███████╗██████╔╝
+// ╚═╝  ╚═══╝ ╚═════╝    ╚═╝        ╚═════╝ ╚══════╝╚══════╝╚═════╝ 
+
+
 function drawContours() {
     for (var i = 0; i < contourFinder.allContours.length; i++) {
-        console.log('contour #' + i + ' length: ' + contourFinder.allContours[i].length);
+        // console.log('contour #' + i + ' length: ' + contourFinder.allContours[i].length);
         drawContour(i);
     }
     animate();
