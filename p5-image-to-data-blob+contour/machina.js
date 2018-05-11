@@ -110,6 +110,7 @@ rws.timeout = 1000;
 rws.addEventListener('open', () => {
     // console.log('send-strokes');
     // rws.send('{"method":"send-strokes", "params": {"strokes": [[-3,4,1,0,0],[3,10,1,0,0]]}}');
+    console.log('websocket.open()');
     initializeRobot();
 });
 
@@ -129,6 +130,9 @@ rws.onerror = (err) => {
 };
 
 function initializeRobot() {
+    console.log('intializeRobot()');
+
+    
     robotDrawer = new Robot(rws);
 
     // Init the sharpies (definitions taken from 'toolDefinitionGenerator' in GH)
@@ -156,6 +160,8 @@ function initializeRobot() {
         default:
             bot.Message("CANNOT INITIALIZE SHARPIE TOOLS");
             break;
+
+        bot.Message("Initialized robot on robo-artist.");
     }
 
     homeRobot(robotDrawer);

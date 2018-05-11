@@ -23,7 +23,7 @@ function setup() {
     stroke(0);
     strokeWeight(1);
     noFill();
-    setTimeout(function() { extractEdges(); }, 1000);
+    setTimeout(function() { extractEdges(); }, 2500);
 }
 
 function draw() {
@@ -115,12 +115,6 @@ function extractEdges() {
     // parseContours(contourFinder);
 }
 
-function keyPressed() {
-    console.log(key);
-    if (key == 'E') {
-        extractEdges();
-    }
-}
 
 function processContours(contourFinder) {
 
@@ -205,7 +199,7 @@ let paperWidth = 17 * 25.4;
 let paperScale;
 
 let travelSpeed = 200;
-    //drawingSpeed = 25;
+    robotDrawingSpeed = 25;
 
 let approachDistance = 50;
 let penUpDistance = 15;
@@ -239,7 +233,7 @@ function drawPolylineStroke(polyline) {
 
 }
 
-function print() {
+function printRobot(bot, cornerZ) {
     // TODO: if there are polylines
     // archive "drawn polylines"
 
@@ -247,6 +241,7 @@ function print() {
     let firstPosition = stroke[0];
 
     bot.Message("Drawing stroke");
+    console.Message("Drawing stroke");
 
     bot.Attach("sharpie1");
 
@@ -268,7 +263,7 @@ function print() {
 
     bot.PushSettings();
     bot.MotionMode("joint");
-    bot.SpeedTo(drawingSpeed);
+    bot.SpeedTo(robotDrawingSpeed);
     bot.PrecisionTo(drawingPrecision);
 
     for (let i = 0; i < stroke.length; i++) {
@@ -279,7 +274,7 @@ function print() {
             cornerY + paperScale * position.x,
             cornerZ);
 
-        if (i == polyline.length - 1) {
+        if (i == stroke.length - 1) {
             //last gets up
             bot.Move(0, 0, approachDistance);
         } else {
@@ -362,9 +357,11 @@ function print() {
 //  ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚══════╝╚══════╝
 //                                               
 
-
 function keyTyped() {
     switch (key) {
+        case 'a':
+            toggleAnimation();
+        break;
         case 'm':
             if (ROBOT_MAKE == 'ABB') {
                 ROBOT_MAKE = 'UR';
@@ -372,22 +369,28 @@ function keyTyped() {
                 ROBOT_MAKE = 'ABB'
             }
             return false;
+        case 'e':
+            extractEdges();
+            break;
         case 'p':
-            print();
-            return false;
+            console.log('p, print');
+            printRobot(robotDrawer, cornerZSharpie1);
+            break;
 
         case 'h':
             homeRobot(robotDrawer);
             return false;
-
-            // Change model:
+        case '1':
+            minLength += 3;
+            break;
+        case '2':
+            minLength += -3;
+            break;
+        case '3':
+            minLength = 5;
+            break;
         default:
-            let numericEntry = availableModels[key];
-            if (numericEntry) {
-                model_name_current = availableModels[key];
-                console.log("Set model to #" + key + " " + model_name_current);
-                return false;
-            }
+
             break;
     };
 
