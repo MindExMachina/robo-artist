@@ -131,14 +131,12 @@ rws.onerror = (err) => {
 
 function initializeRobot() {
     console.log('intializeRobot()');
-
-    
     robotDrawer = new Robot(rws);
 
     // Init the sharpies (definitions taken from 'toolDefinitionGenerator' in GH)
     switch (ROBOT_MAKE.toUpperCase()) {
         // new Tool("${name}",${x},${y},${z},${x0},${x1},${x2},${y0},${y1},${y2},${weightkg},${gx},${gy},${gz});`);
-        case "UR":
+        case "UR":``
             robotDrawer.Tool("sharpie1",
                 101.116, 0, 150.116,
                 0.70711, 0, -0.70711,

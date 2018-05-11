@@ -239,9 +239,10 @@ function printRobot(bot, cornerZ) {
 
     let stroke = polylines[0];
     let firstPosition = stroke[0];
-
+    console.log('printRobot Drawing stroke');
+    
+    paperScale = paperWidth/width;
     bot.Message("Drawing stroke");
-    console.Message("Drawing stroke");
 
     bot.Attach("sharpie1");
 
@@ -266,6 +267,7 @@ function printRobot(bot, cornerZ) {
     bot.SpeedTo(robotDrawingSpeed);
     bot.PrecisionTo(drawingPrecision);
 
+    console.log('printRobot before stroke iteration ');
     for (let i = 0; i < stroke.length; i++) {
 
         let position = stroke[i];
