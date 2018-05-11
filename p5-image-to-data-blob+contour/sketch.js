@@ -297,8 +297,8 @@ function printRobot(bot, cornerZ) {
         bot.TransformTo(
             cornerX + paperScale * firstPosition.y,
             cornerY + paperScale * firstPosition.x,
-            cornerZ + approachDistancecornerX + paperScale * firstPosition.y,
-            cornerY + paperScale * firstPosition.x,
+            // cornerZ + approachDistancecornerX + paperScale * firstPosition.y,
+            // cornerY + paperScale * firstPosition.x,
             cornerZ + approachDistance,
             // ..
             -1, 0, 0,
