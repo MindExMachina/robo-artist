@@ -62,9 +62,6 @@ function setCaptureImage() {
 
 ////////-------------------------------------
 
-
-
-
 function process() {
     startTime = Date.now();
 
