@@ -118,18 +118,30 @@ function extractEdges() {
 
 function processContours(contourFinder) {
 
-    polylines = JSON.parse(JSON.stringify(contourFinder.allContours));
+    let shouldScale = false;
 
+    if(shouldScale) {
     // iterate through contours
-    // let contours = JSON.parse(JSON.stringify(contourFinder.allContours));
-    // for (var i = 0; i < contours.length - 1; i++) {
-    //     let polyline = [];
-    //     let contour = contours[i];
-    //     for (var j = 0; j < contour.length - 1; j++) {
-    //         polyline.push(contour[j]);
-    //     }
-    //     polylines.push(polyline);
-    // }
+    polylines = [];
+        let contours = JSON.parse(JSON.stringify(contourFinder.allContours));
+        for (var i = 0; i < contours.length - 1; i++) {
+            let polyline = [];
+            let contour = contours[i];
+            for (var j = 0; j < contour.length - 1; j++) {
+                let position = contour[j];
+                let origin = {x: -100, y: 300};
+                polyline.push({
+                    x: origin.x + position.x*0.2,
+                    y: origin.y + position.y*0.2
+                });
+            }
+            polylines.push(polyline);
+        }
+    } else {
+        polylines = JSON.parse(JSON.stringify(contourFinder.allContours));
+    }
+
+
 
     extractingEdges = false;
     pointCount = getPointCount();
@@ -189,7 +201,7 @@ let tolerance = 15;
 // Virtual paper data in robot coordinates (note pixel coordinates will be flipped)
 // Horizontal drawing defined by top-left corner, and width-height in mm
 // Should probably match pixel space for easier mapping...
-const ROBOT_MAKE = "ABB";
+const ROBOT_MAKE = "UR";
 
 let cornerX = 500,
     cornerY = 100,
@@ -234,10 +246,27 @@ function drawPolylineStroke(polyline) {
 }
 
 function printRobot(bot, cornerZ) {
+
+    scaled_polylines = [];
+    let polylines_copy = JSON.parse(JSON.stringify(polylines));
+    for (var i = 0; i < polylines_copy.length - 1; i++) {
+        let polyline = [];
+        let contour = polylines_copy[i];
+        for (var j = 0; j < contour.length - 1; j++) {
+            let position = contour[j];
+            let origin = {x: -100, y: 300};
+            polyline.push({
+                x: origin.x + position.x*0.2,
+                y: origin.y + position.y*0.2
+            });
+        }
+        scaled_polylines.push(polyline);
+    }
+
     // TODO: if there are polylines
     // archive "drawn polylines"
 
-    let stroke = polylines[0];
+    let stroke = scaled_polylines[0];
     let firstPosition = stroke[0];
     console.log('printRobot Drawing stroke');
     
@@ -248,18 +277,35 @@ function printRobot(bot, cornerZ) {
 
     // start print stroke
 
+    let approachDistancecornerX = 0; // TODO:initialize before
+
     bot.PushSettings();
     bot.MotionMode("joint");
     bot.SpeedTo(travelSpeed);
     bot.PrecisionTo(approachPrecision);
     //bot.TransformTo(cornerX + paperScale * this.vectors[0][1], cornerY + paperScale * this.vectors[0][0], cornerZ + approachDistance, -1, 0, 0, 0, 1, 0); // Note robot XY and processing XY are flipped... 
-    bot.TransformTo(
-        cornerX + paperScale * firstPosition.y,
-        cornerY + paperScale * firstPosition.x,
-        cornerZ + approachDistance,
-        // ..
-        -1, 0, 0,
-        0, 1, 0); // Note robot XY and processing XY are flipped... 
+    // bot.TransformTo(
+    //     cornerX + paperScale * firstPosition.y,
+    //     cornerY + paperScale * firstPosition.x,
+    //     cornerZ + approachDistancecornerX + paperScale * firstPosition.y,
+    //     cornerY + paperScale * firstPosition.x,
+    //     cornerZ + approachDistance,
+    //     // ..
+    //     -1, 0, 0,
+    //     0, 1, 0); // Note robot XY and processing XY are flipped... 
+
+        bot.TransformTo(
+            cornerX + paperScale * firstPosition.y,
+            cornerY + paperScale * firstPosition.x,
+            cornerZ + approachDistancecornerX + paperScale * firstPosition.y,
+            cornerY + paperScale * firstPosition.x,
+            cornerZ + approachDistance,
+            // ..
+            -1, 0, 0,
+            0, 1, 0); // Note robot XY and processing XY are flipped... 
+
+
+
     bot.PopSettings();
 
     bot.PushSettings();
