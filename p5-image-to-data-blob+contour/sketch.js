@@ -204,8 +204,8 @@ let cornerX = 500,
 let paperWidth = 17 * 25.4;
 let paperScale;
 
-let travelSpeed = 200,
-    drawingSpeed = 25;
+let travelSpeed = 200;
+    //drawingSpeed = 25;
 
 let approachDistance = 50;
 let penUpDistance = 15;
