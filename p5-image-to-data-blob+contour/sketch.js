@@ -23,7 +23,7 @@ function setup() {
     stroke(0);
     strokeWeight(1);
     noFill();
-    setTimeout(function() { extractEdges(); }, 1000);
+    setTimeout(function() { extractEdges(); }, 2500);
 }
 
 function draw() {
@@ -115,27 +115,33 @@ function extractEdges() {
     // parseContours(contourFinder);
 }
 
-function keyPressed() {
-    console.log(key);
-    if (key == 'E') {
-        extractEdges();
-    }
-}
 
 function processContours(contourFinder) {
 
-    polylines = JSON.parse(JSON.stringify(contourFinder.allContours));
+    let shouldScale = false;
 
+    if(shouldScale) {
     // iterate through contours
-    // let contours = JSON.parse(JSON.stringify(contourFinder.allContours));
-    // for (var i = 0; i < contours.length - 1; i++) {
-    //     let polyline = [];
-    //     let contour = contours[i];
-    //     for (var j = 0; j < contour.length - 1; j++) {
-    //         polyline.push(contour[j]);
-    //     }
-    //     polylines.push(polyline);
-    // }
+    polylines = [];
+        let contours = JSON.parse(JSON.stringify(contourFinder.allContours));
+        for (var i = 0; i < contours.length - 1; i++) {
+            let polyline = [];
+            let contour = contours[i];
+            for (var j = 0; j < contour.length - 1; j++) {
+                let position = contour[j];
+                let origin = {x: -100, y: 300};
+                polyline.push({
+                    x: origin.x + position.x*0.2,
+                    y: origin.y + position.y*0.2
+                });
+            }
+            polylines.push(polyline);
+        }
+    } else {
+        polylines = JSON.parse(JSON.stringify(contourFinder.allContours));
+    }
+
+
 
     extractingEdges = false;
     pointCount = getPointCount();
@@ -195,7 +201,7 @@ let tolerance = 15;
 // Virtual paper data in robot coordinates (note pixel coordinates will be flipped)
 // Horizontal drawing defined by top-left corner, and width-height in mm
 // Should probably match pixel space for easier mapping...
-const ROBOT_MAKE = "ABB";
+const ROBOT_MAKE = "UR";
 
 let cornerX = 500,
     cornerY = 100,
@@ -204,8 +210,8 @@ let cornerX = 500,
 let paperWidth = 17 * 25.4;
 let paperScale;
 
-let travelSpeed = 200,
-    drawingSpeed = 25;
+let travelSpeed = 200;
+    robotDrawingSpeed = 25;
 
 let approachDistance = 50;
 let penUpDistance = 15;
@@ -239,38 +245,75 @@ function drawPolylineStroke(polyline) {
 
 }
 
-function print() {
+function printRobot(bot, cornerZ) {
+
+    scaled_polylines = [];
+    let polylines_copy = JSON.parse(JSON.stringify(polylines));
+    for (var i = 0; i < polylines_copy.length - 1; i++) {
+        let polyline = [];
+        let contour = polylines_copy[i];
+        for (var j = 0; j < contour.length - 1; j++) {
+            let position = contour[j];
+            let origin = {x: -100, y: 300};
+            polyline.push({
+                x: origin.x + position.x*0.2,
+                y: origin.y + position.y*0.2
+            });
+        }
+        scaled_polylines.push(polyline);
+    }
+
     // TODO: if there are polylines
     // archive "drawn polylines"
 
-    let stroke = polylines[0];
+    let stroke = scaled_polylines[0];
     let firstPosition = stroke[0];
-
+    console.log('printRobot Drawing stroke');
+    
+    paperScale = paperWidth/width;
     bot.Message("Drawing stroke");
 
     bot.Attach("sharpie1");
 
     // start print stroke
 
+    let approachDistancecornerX = 0; // TODO:initialize before
+
     bot.PushSettings();
     bot.MotionMode("joint");
     bot.SpeedTo(travelSpeed);
     bot.PrecisionTo(approachPrecision);
     //bot.TransformTo(cornerX + paperScale * this.vectors[0][1], cornerY + paperScale * this.vectors[0][0], cornerZ + approachDistance, -1, 0, 0, 0, 1, 0); // Note robot XY and processing XY are flipped... 
-    bot.TransformTo(
-        cornerX + paperScale * firstPosition.y,
-        cornerY + paperScale * firstPosition.x,
-        cornerZ + approachDistance,
-        // ..
-        -1, 0, 0,
-        0, 1, 0); // Note robot XY and processing XY are flipped... 
+    // bot.TransformTo(
+    //     cornerX + paperScale * firstPosition.y,
+    //     cornerY + paperScale * firstPosition.x,
+    //     cornerZ + approachDistancecornerX + paperScale * firstPosition.y,
+    //     cornerY + paperScale * firstPosition.x,
+    //     cornerZ + approachDistance,
+    //     // ..
+    //     -1, 0, 0,
+    //     0, 1, 0); // Note robot XY and processing XY are flipped... 
+
+        bot.TransformTo(
+            cornerX + paperScale * firstPosition.y,
+            cornerY + paperScale * firstPosition.x,
+            // cornerZ + approachDistancecornerX + paperScale * firstPosition.y,
+            // cornerY + paperScale * firstPosition.x,
+            cornerZ + approachDistance,
+            // ..
+            -1, 0, 0,
+            0, 1, 0); // Note robot XY and processing XY are flipped... 
+
+
+
     bot.PopSettings();
 
     bot.PushSettings();
     bot.MotionMode("joint");
-    bot.SpeedTo(drawingSpeed);
+    bot.SpeedTo(robotDrawingSpeed);
     bot.PrecisionTo(drawingPrecision);
 
+    console.log('printRobot before stroke iteration ');
     for (let i = 0; i < stroke.length; i++) {
 
         let position = stroke[i];
@@ -279,7 +322,7 @@ function print() {
             cornerY + paperScale * position.x,
             cornerZ);
 
-        if (i == polyline.length - 1) {
+        if (i == stroke.length - 1) {
             //last gets up
             bot.Move(0, 0, approachDistance);
         } else {
@@ -362,9 +405,11 @@ function print() {
 //  ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚══════╝╚══════╝
 //                                               
 
-
 function keyTyped() {
     switch (key) {
+        case 'a':
+            toggleAnimation();
+        break;
         case 'm':
             if (ROBOT_MAKE == 'ABB') {
                 ROBOT_MAKE = 'UR';
@@ -372,22 +417,28 @@ function keyTyped() {
                 ROBOT_MAKE = 'ABB'
             }
             return false;
+        case 'e':
+            extractEdges();
+            break;
         case 'p':
-            print();
-            return false;
+            console.log('p, print');
+            printRobot(robotDrawer, cornerZSharpie1);
+            break;
 
         case 'h':
             homeRobot(robotDrawer);
             return false;
-
-            // Change model:
+        case '1':
+            minLength += 3;
+            break;
+        case '2':
+            minLength += -3;
+            break;
+        case '3':
+            minLength = 5;
+            break;
         default:
-            let numericEntry = availableModels[key];
-            if (numericEntry) {
-                model_name_current = availableModels[key];
-                console.log("Set model to #" + key + " " + model_name_current);
-                return false;
-            }
+
             break;
     };
 
