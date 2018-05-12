@@ -9,13 +9,14 @@ let minLength = 3;
 
 // loop
 let drawingSpeed = 0.0025; //0.0025;
+let drawingScale = 4;
 let pointCount;
 let drawingCompletion = 1;
 let loopAnimation = true;
 let animateDrawing = false;
 
 function setup() {
-    createCanvas(480, 240);
+    createCanvas(480 * 3, 240 * 3);
     capture = createCapture(VIDEO);
     capture.size(320, 240);
     capture.hide();
@@ -28,7 +29,7 @@ function setup() {
 
 function draw() {
 
-    background(255);
+    background(250);
 
     if (!extractingEdges && shouldExtract) {
         extractEdges();
@@ -53,7 +54,7 @@ function draw() {
                 let displayCompletion = Math.sin(drawingCompletion * Math.PI - Math.PI / 2) * 0.5 + 0.5;
                 if (drawingStage < displayCompletion) {
                     let p = pl[i];
-                    vertex(origin.x + p.x, origin.y + p.y);
+                    vertex(origin.x + p.x * drawingScale, origin.y + p.y * drawingScale);
                 }
                 drawnPointCount++;
             }
@@ -88,7 +89,9 @@ function draw() {
 
     //frameC++;
 
-    image(capture.loadPixels(), 240, 0, 320, 240);
+    if (shouldDisplayCapture) {
+        image(capture.loadPixels(), 240, 0, 320, 240);
+    }
 }
 
 // function mouseClicked() {
@@ -120,19 +123,19 @@ function processContours(contourFinder) {
 
     let shouldScale = false;
 
-    if(shouldScale) {
-    // iterate through contours
-    polylines = [];
+    if (shouldScale) {
+        // iterate through contours
+        polylines = [];
         let contours = JSON.parse(JSON.stringify(contourFinder.allContours));
         for (var i = 0; i < contours.length - 1; i++) {
             let polyline = [];
             let contour = contours[i];
             for (var j = 0; j < contour.length - 1; j++) {
                 let position = contour[j];
-                let origin = {x: -100, y: 300};
+                let origin = { x: -100, y: 300 };
                 polyline.push({
-                    x: origin.x + position.x*0.2,
-                    y: origin.y + position.y*0.2
+                    x: origin.x + position.x * 0.2,
+                    y: origin.y + position.y * 0.2
                 });
             }
             polylines.push(polyline);
@@ -211,7 +214,7 @@ let paperWidth = 17 * 25.4;
 let paperScale;
 
 let travelSpeed = 200;
-    robotDrawingSpeed = 25;
+robotDrawingSpeed = 25;
 
 let approachDistance = 50;
 let penUpDistance = 15;
@@ -254,10 +257,10 @@ function printRobot(bot, cornerZ) {
         let contour = polylines_copy[i];
         for (var j = 0; j < contour.length - 1; j++) {
             let position = contour[j];
-            let origin = {x: -100, y: 300};
+            let origin = { x: -100, y: 300 };
             polyline.push({
-                x: origin.x + position.x*0.2,
-                y: origin.y + position.y*0.2
+                x: origin.x + position.x * 0.2,
+                y: origin.y + position.y * 0.2
             });
         }
         scaled_polylines.push(polyline);
@@ -269,8 +272,8 @@ function printRobot(bot, cornerZ) {
     let stroke = scaled_polylines[0];
     let firstPosition = stroke[0];
     console.log('printRobot Drawing stroke');
-    
-    paperScale = paperWidth/width;
+
+    paperScale = paperWidth / width;
     bot.Message("Drawing stroke");
 
     bot.Attach("sharpie1");
@@ -294,15 +297,15 @@ function printRobot(bot, cornerZ) {
     //     -1, 0, 0,
     //     0, 1, 0); // Note robot XY and processing XY are flipped... 
 
-        bot.TransformTo(
-            cornerX + paperScale * firstPosition.y,
-            cornerY + paperScale * firstPosition.x,
-            // cornerZ + approachDistancecornerX + paperScale * firstPosition.y,
-            // cornerY + paperScale * firstPosition.x,
-            cornerZ + approachDistance,
-            // ..
-            -1, 0, 0,
-            0, 1, 0); // Note robot XY and processing XY are flipped... 
+    bot.TransformTo(
+        cornerX + paperScale * firstPosition.y,
+        cornerY + paperScale * firstPosition.x,
+        // cornerZ + approachDistancecornerX + paperScale * firstPosition.y,
+        // cornerY + paperScale * firstPosition.x,
+        cornerZ + approachDistance,
+        // ..
+        -1, 0, 0,
+        0, 1, 0); // Note robot XY and processing XY are flipped... 
 
 
 
@@ -407,9 +410,12 @@ function printRobot(bot, cornerZ) {
 
 function keyTyped() {
     switch (key) {
+        case 'l':
+            shouldExtract = !shouldExtract;
+            break;
         case 'a':
             toggleAnimation();
-        break;
+            break;
         case 'm':
             if (ROBOT_MAKE == 'ABB') {
                 ROBOT_MAKE = 'UR';
