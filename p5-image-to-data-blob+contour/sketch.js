@@ -3,6 +3,7 @@ var img;
 // Keep latest detected edges as polylines
 let polylines = [];
 let origin = { x: 0, y: 0 };
+let paperCorner = { x: 700, y: 100, z: 300 };
 let extractingEdges = false;
 let shouldExtract = false;
 let minLength = 3;
@@ -55,7 +56,7 @@ function draw() {
                 let displayCompletion = Math.sin(drawingCompletion * Math.PI - Math.PI / 2) * 0.5 + 0.5;
                 if (drawingStage < displayCompletion) {
                     let p = pl[i];
-                    vertex(origin.x + p.x * drawingScale, origin.y + p.y * drawingScale);
+                    vertex(p.x * drawingScale, p.y * drawingScale);
                 }
                 drawnPointCount++;
             }
@@ -109,7 +110,7 @@ function toggleAnimation() {
 function captureDataURL() {
     return capture.loadPixels().canvas.toDataURL();
 }
-
+//: 700, y: 50
 function extractEdges() {
 
     img = document.getElementById('image');
@@ -117,6 +118,13 @@ function extractEdges() {
 
     setCaptureImage();
     // parseContours(contourFinder);
+}
+
+function extractEdgesFromData(data) {
+    img = document.getElementById('image');
+    img.src = data;
+
+    setCaptureImage();
 }
 
 
@@ -207,10 +215,10 @@ let tolerance = 15;
 // Should probably match pixel space for easier mapping...
 const ROBOT_MAKE = "UR";
 
-let cornerX = 500,
-    cornerY = 100,
-    cornerZSharpie1 = 215, // should lower this value to the Z height of the drawing surface 
-    cornerZSharpie4 = 217.5; // this one too
+// let cornerX = 500,
+//     cornerY = 100,
+//     cornerZSharpie1 = 215, // should lower this value to the Z height of the drawing surface 
+//     cornerZSharpie4 = 217.5; // this one too
 let paperWidth = 17 * 25.4;
 let paperScale;
 
@@ -251,6 +259,8 @@ function drawPolylineStroke(polyline) {
 
 function printRobot(bot, cornerZ) {
 
+    paperScale = paperWidth / 320;
+
     scaled_polylines = [];
     let polylines_copy = JSON.parse(JSON.stringify(polylines));
     for (var i = 0; i < polylines_copy.length - 1; i++) {
@@ -260,8 +270,8 @@ function printRobot(bot, cornerZ) {
             let position = contour[j];
             let origin = { x: -100, y: 300 };
             polyline.push({
-                x: origin.x + position.x * 0.2,
-                y: origin.y + position.y * 0.2
+                x: paperCorner.x + position.y * paperScale,
+                y: paperCorner.y + position.x * paperScale
             });
         }
         scaled_polylines.push(polyline);
@@ -274,7 +284,7 @@ function printRobot(bot, cornerZ) {
     let firstPosition = stroke[0];
     console.log('printRobot Drawing stroke');
 
-    paperScale = paperWidth / width;
+
     bot.Message("Drawing stroke");
 
     bot.Attach("sharpie1");
@@ -287,28 +297,10 @@ function printRobot(bot, cornerZ) {
     bot.MotionMode("joint");
     bot.SpeedTo(travelSpeed);
     bot.PrecisionTo(approachPrecision);
-    //bot.TransformTo(cornerX + paperScale * this.vectors[0][1], cornerY + paperScale * this.vectors[0][0], cornerZ + approachDistance, -1, 0, 0, 0, 1, 0); // Note robot XY and processing XY are flipped... 
-    // bot.TransformTo(
-    //     cornerX + paperScale * firstPosition.y,
-    //     cornerY + paperScale * firstPosition.x,
-    //     cornerZ + approachDistancecornerX + paperScale * firstPosition.y,
-    //     cornerY + paperScale * firstPosition.x,
-    //     cornerZ + approachDistance,
-    //     // ..
-    //     -1, 0, 0,
-    //     0, 1, 0); // Note robot XY and processing XY are flipped... 
 
     bot.TransformTo(
-        cornerX + paperScale * firstPosition.y,
-        cornerY + paperScale * firstPosition.x,
-        // cornerZ + approachDistancecornerX + paperScale * firstPosition.y,
-        // cornerY + paperScale * firstPosition.x,
-        cornerZ + approachDistance,
-        // ..
-        -1, 0, 0,
-        0, 1, 0); // Note robot XY and processing XY are flipped... 
-
-
+        firstPosition.x, firstPosition.y, paperCorner.z + approachDistance, -1, 0, 0,
+        0, 1, 0);
 
     bot.PopSettings();
 
@@ -321,17 +313,13 @@ function printRobot(bot, cornerZ) {
     for (let i = 0; i < stroke.length; i++) {
 
         let position = stroke[i];
-        bot.MoveTo(
-            cornerX + paperScale * position.y,
-            cornerY + paperScale * position.x,
-            cornerZ);
 
         if (i == stroke.length - 1) {
             //last gets up
             bot.Move(0, 0, approachDistance);
         } else {
             // every position but the last is MoveTo
-            bot.MoveTo(position.x, position.y, cornerZ)
+            bot.MoveTo(position.x, position.y, paperCorner.z);
         }
 
     }
@@ -343,61 +331,6 @@ function printRobot(bot, cornerZ) {
     bot.Wait(1000);
 }
 
-// function sendStrokeToRobot(bot, cornerZ) {
-
-//     bot.PushSettings();
-//     bot.MotionMode("joint");
-//     bot.SpeedTo(travelSpeed);
-//     bot.PrecisionTo(approachPrecision);
-//     bot.TransformTo(cornerX + paperScale * this.vectors[0][1], cornerY + paperScale * this.vectors[0][0], cornerZ + approachDistance, -1, 0, 0, 0, 1, 0); // Note robot XY and processing XY are flipped... 
-//     bot.PopSettings();
-
-//     bot.PushSettings();
-//     bot.MotionMode("joint");
-//     bot.SpeedTo(drawingSpeed);
-//     bot.PrecisionTo(drawingPrecision);
-
-//     for (let i = 0; i < this.vectors.length; i++) {
-//         bot.MoveTo(cornerX + paperScale * this.vectors[i][1], cornerY + paperScale * this.vectors[i][0], cornerZ);
-
-//         // Check if pen up
-//         if (this.vectors[i][3] == 1) {
-//             bot.Move(0, 0, penUpDistance);
-//             if (this.vectors[i + 1]) {
-//                 bot.MoveTo(cornerX + paperScale * this.vectors[i + 1][1], cornerY + paperScale * this.vectors[i + 1][0], cornerZ + penUpDistance);
-//             }
-//         } else if (this.vectors[i][4] == 1) {
-//             bot.Move(0, 0, approachDistance);
-//         }
-//     }
-
-//     bot.PopSettings();
-
-//     this.streamed = true;
-// }
-
-// function sendNextStrokeToRobot(bot) {
-//     // Send the inputstroke
-//     if (!this.inputStroke.streamed && this.inputStroke.started) {
-//         paperScale = paperWidth / width; // in case widndow changed
-
-//         bot.Message("Drawing stroke");
-
-//         bot.Attach("sharpie1");
-//         this.inputStroke.sendStrokeToRobot(bot, cornerZSharpie1);
-
-//         bot.Wait(1000);
-//     }
-//     // send the prediction
-//     else if (this.predictedStroke) {
-//         bot.Attach("sharpie4");
-//         this.predictedStroke.sendStrokeToRobot(bot, cornerZSharpie4);
-
-//         bot.Wait(1000);
-//     }
-
-//     return this.predictedStroke && this.predictedStroke.streamed;
-// }
 
 
 
@@ -431,7 +364,11 @@ function keyTyped() {
             console.log('p, print');
             printRobot(robotDrawer, cornerZSharpie1);
             break;
-
+        case '0':
+            polylines = [
+                [{ x: 10, y: 10 }, { x: 310, y: 10 }, { x: 310, y: 230 }, { x: 10, y: 230 }, { x: 10, y: 10 }]
+            ];
+            break;
         case 'h':
             homeRobot(robotDrawer);
             return false;
