@@ -3,7 +3,9 @@ var img;
 // Keep latest detected edges as polylines
 let polylines = [];
 let origin = { x: 0, y: 0 };
-let paperCorner = { x: 700, y: 100, z: 300 };
+// let paperCorner = { x: 700, y: -300, z: 16 };
+let paperCorner = { x: 700, y: 100, z: 16 };
+// let paperCorner = { x: 700, y: 100, z: 17 };
 let extractingEdges = false;
 let shouldExtract = false;
 let minLength = 3;
@@ -16,6 +18,8 @@ let drawingCompletion = 1;
 let loopAnimation = true;
 let animateDrawing = false;
 let shouldDisplayCapture = false;
+let shouldOptimizeContours = false;
+let drawingWeight = 5;
 
 function setup() {
     createCanvas(480 * 3, 240 * 3.5);
@@ -24,7 +28,7 @@ function setup() {
     capture.hide();
 
     stroke(0);
-    strokeWeight(1);
+    strokeWeight(drawingWeight);
     noFill();
     setTimeout(function() { extractEdges(); }, 2500);
 }
@@ -200,14 +204,6 @@ function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
 }
 
-
-// ------------------------
-// ------------------------
-// ------------------------
-// ------------------------
-// ------------------------
-// ------------------------
-
 let tolerance = 15;
 
 // Virtual paper data in robot coordinates (note pixel coordinates will be flipped)
@@ -215,29 +211,19 @@ let tolerance = 15;
 // Should probably match pixel space for easier mapping...
 const ROBOT_MAKE = "UR";
 
-// let cornerX = 500,
-//     cornerY = 100,
-//     cornerZSharpie1 = 215, // should lower this value to the Z height of the drawing surface 
-//     cornerZSharpie4 = 217.5; // this one too
 let paperWidth = 17 * 25.4;
 let paperScale;
 
-let travelSpeed = 200;
+let travelSpeed = 100;
 robotDrawingSpeed = 25;
 
-let approachDistance = 50;
+let approachDistance = 10;
 let penUpDistance = 15;
 let approachPrecision = 5,
     drawingPrecision = 1;
 
 let robotDrawer;
 
-// ------------------------
-// ------------------------
-// ------------------------
-// ------------------------
-// ------------------------
-// ------------------------
 
 function drawPolylineStroke(polyline) {
 
@@ -257,16 +243,16 @@ function drawPolylineStroke(polyline) {
 
 }
 
-function printRobot(bot, cornerZ) {
+function printRobot(bot) {
 
     paperScale = paperWidth / 320;
 
     scaled_polylines = [];
     let polylines_copy = JSON.parse(JSON.stringify(polylines));
-    for (var i = 0; i < polylines_copy.length - 1; i++) {
+    for (var i = 0; i < polylines_copy.length; i++) {
         let polyline = [];
         let contour = polylines_copy[i];
-        for (var j = 0; j < contour.length - 1; j++) {
+        for (var j = 0; j < contour.length; j++) {
             let position = contour[j];
             let origin = { x: -100, y: 300 };
             polyline.push({
@@ -279,56 +265,69 @@ function printRobot(bot, cornerZ) {
 
     // TODO: if there are polylines
     // archive "drawn polylines"
+    //console.log(scaled_polylines);
 
-    let stroke = scaled_polylines[0];
-    let firstPosition = stroke[0];
-    console.log('printRobot Drawing stroke');
+    for(var k = 0; k < scaled_polylines.length; k++) {
 
-
-    bot.Message("Drawing stroke");
-
-    bot.Attach("sharpie1");
-
-    // start print stroke
-
-    let approachDistancecornerX = 0; // TODO:initialize before
-
-    bot.PushSettings();
-    bot.MotionMode("joint");
-    bot.SpeedTo(travelSpeed);
-    bot.PrecisionTo(approachPrecision);
-
-    bot.TransformTo(
-        firstPosition.x, firstPosition.y, paperCorner.z + approachDistance, -1, 0, 0,
-        0, 1, 0);
-
-    bot.PopSettings();
-
-    bot.PushSettings();
-    bot.MotionMode("joint");
-    bot.SpeedTo(robotDrawingSpeed);
-    bot.PrecisionTo(drawingPrecision);
-
-    console.log('printRobot before stroke iteration ');
-    for (let i = 0; i < stroke.length; i++) {
-
-        let position = stroke[i];
-
-        if (i == stroke.length - 1) {
-            //last gets up
-            bot.Move(0, 0, approachDistance);
-        } else {
-            // every position but the last is MoveTo
-            bot.MoveTo(position.x, position.y, paperCorner.z);
+        let stroke = scaled_polylines[k];
+        let firstPosition = stroke[0];
+        console.log('printRobot Drawing stroke');
+    
+        bot.Message("Drawing stroke");
+    
+        bot.Attach("sharpie1");
+    
+        // start print stroke
+    
+        let approachDistancecornerX = 0; // TODO:initialize before
+    
+        bot.PushSettings();
+        bot.MotionMode("joint");
+        bot.SpeedTo(travelSpeed);
+        bot.PrecisionTo(approachPrecision);
+    
+        bot.TransformTo(
+            firstPosition.x, firstPosition.y, paperCorner.z + approachDistance, -1, 0, 0,
+            0, 1, 0);
+    
+        bot.PopSettings();
+    
+        bot.PushSettings();
+        bot.MotionMode("joint");
+        bot.SpeedTo(robotDrawingSpeed);
+        bot.PrecisionTo(drawingPrecision);
+    
+        console.log('printRobot before stroke iteration ');
+        for (let i = 0; i < stroke.length; i++) {
+    
+            let position = stroke[i];
+    
+            if (i == stroke.length - 1) {
+                //last gets up
+                bot.MoveTo(position.x, position.y, paperCorner.z);
+                //console.log("bot.MoveTo("+position.x+", "+position.y+", "+paperCorner.z+");");
+                bot.Move(0, 0, approachDistance);
+                //console.log("bot.Move(0, 0, "+approachDistance+");");
+            } else {
+                // every position but the last is MoveTo
+                bot.MoveTo(position.x, position.y, paperCorner.z);
+                //console.log("bot.MoveTo("+position.x+", "+position.y+", "+paperCorner.z+");");
+            }
+    
         }
+    
+        bot.PopSettings();
 
     }
-
-    bot.PopSettings();
 
     // end print stroke
 
     bot.Wait(1000);
+
+    bot.Move(0, 0, 100);
+
+    bot.Wait(1000);
+    
 }
 
 
@@ -362,7 +361,11 @@ function keyTyped() {
             break;
         case 'p':
             console.log('p, print');
-            printRobot(robotDrawer, cornerZSharpie1);
+            printRobot(robotDrawer);
+            break;
+        case '9':
+            shouldOptimizeContours = !shouldOptimizeContours;
+            console.log('shouldOptimizeContours: ' + shouldOptimizeContours);
             break;
         case '0':
             polylines = [
@@ -383,6 +386,14 @@ function keyTyped() {
             break;
         case 'c':
             shouldDisplayCapture = !shouldDisplayCapture;
+            break;
+        case '3':
+            drawingWeight += -0.3;
+            strokeWeight(drawingWeight);
+            break;
+        case '4':
+            drawingWeight += 0.3;
+            strokeWeight(drawingWeight);
             break;
         default:
 

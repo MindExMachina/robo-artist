@@ -79,6 +79,9 @@ function process() {
     var secs = (Date.now() - startTime) / 1000;
     // console.log('Finding contours took ' + secs + 's');
 
+    if(shouldOptimizeContours){
+        contourFinder.allContours = optimizeContours();
+    }
     processContours(contourFinder);
     //drawContours();
 }
@@ -111,6 +114,45 @@ function findOutDirection(point1, point2) {
     }
 }
 
+function optimizeContours() {
+    var optimizedContours = [];
+    for (var i = 0; i < contourFinder.allContours.length; i++) {
+        optimizedContours.push(optimizeContour(i));
+    }
+    return optimizedContours;
+}
+
+function optimizeContour(index) {
+
+    var points = contourFinder.allContours[index];
+
+    var optimizedPoints = [],
+        direction = null;
+
+    points.reduce(function(accumulator, currentValue, currentIndex, array) {
+        if (optimizedPoints.length === 0) {
+            optimizedPoints.push(currentValue);
+            return null;
+        } else {
+            var direction = findOutDirection(currentValue, array[currentIndex - 1]);
+            if (direction === DIRECTIONS.SAME) {
+                return accumulator;
+            }
+            if (direction !== accumulator) {
+                optimizedPoints.push(currentValue);
+            } else {
+                optimizedPoints[optimizedPoints.length - 1] = currentValue;
+            }
+            return direction;
+        }
+    }, null);
+
+    // var pointsString = optimizedPoints.map(function(point) {
+    //     return point.x + ',' + point.y;
+    // }).join(' ');
+
+    return optimizedPoints;
+}
 
 // ███╗   ██╗ ██████╗ ████████╗    ██╗   ██╗███████╗███████╗██████╗ 
 // ████╗  ██║██╔═══██╗╚══██╔══╝    ██║   ██║██╔════╝██╔════╝██╔══██╗
