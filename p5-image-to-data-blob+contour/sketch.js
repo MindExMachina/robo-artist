@@ -14,6 +14,7 @@ let pointCount;
 let drawingCompletion = 1;
 let loopAnimation = true;
 let animateDrawing = false;
+let shouldDisplayCapture = false;
 
 function setup() {
     createCanvas(480 * 3, 240 * 3);
@@ -442,6 +443,9 @@ function keyTyped() {
             break;
         case '3':
             minLength = 5;
+            break;
+        case 'c':
+            shouldDisplayCapture = !shouldDisplayCapture;
             break;
         default:
 
