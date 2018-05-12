@@ -17,7 +17,7 @@ let animateDrawing = false;
 let shouldDisplayCapture = false;
 
 function setup() {
-    createCanvas(480 * 3, 240 * 3);
+    createCanvas(480 * 3, 240 * 3.5);
     capture = createCapture(VIDEO);
     capture.size(320, 240);
     capture.hide();
@@ -30,7 +30,7 @@ function setup() {
 
 function draw() {
 
-    background(250);
+    background(255);
 
     if (!extractingEdges && shouldExtract) {
         extractEdges();
@@ -91,7 +91,7 @@ function draw() {
     //frameC++;
 
     if (shouldDisplayCapture) {
-        image(capture.loadPixels(), 240, 0, 320, 240);
+        image(capture.loadPixels(), 0, 0, 320, 240);
     }
 }
 
