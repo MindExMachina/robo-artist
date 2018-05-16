@@ -7,7 +7,7 @@ let origin = { x: 0, y: 0 };
 let paperCorner = { x: 700, y: 100, z: 16 };
 // let paperCorner = { x: 700, y: 100, z: 17 };
 let extractingEdges = false;
-let shouldExtract = false;
+let shouldExtract = true;
 let minLength = 3;
 
 // loop
@@ -267,41 +267,41 @@ function printRobot(bot) {
     // archive "drawn polylines"
     //console.log(scaled_polylines);
 
-    for(var k = 0; k < scaled_polylines.length; k++) {
+    for (var k = 0; k < scaled_polylines.length; k++) {
 
         let stroke = scaled_polylines[k];
         let firstPosition = stroke[0];
         console.log('printRobot Drawing stroke');
-    
+
         bot.Message("Drawing stroke");
-    
+
         bot.Attach("sharpie1");
-    
+
         // start print stroke
-    
+
         let approachDistancecornerX = 0; // TODO:initialize before
-    
+
         bot.PushSettings();
         bot.MotionMode("joint");
         bot.SpeedTo(travelSpeed);
         bot.PrecisionTo(approachPrecision);
-    
+
         bot.TransformTo(
             firstPosition.x, firstPosition.y, paperCorner.z + approachDistance, -1, 0, 0,
             0, 1, 0);
-    
+
         bot.PopSettings();
-    
+
         bot.PushSettings();
         bot.MotionMode("joint");
         bot.SpeedTo(robotDrawingSpeed);
         bot.PrecisionTo(drawingPrecision);
-    
+
         console.log('printRobot before stroke iteration ');
         for (let i = 0; i < stroke.length; i++) {
-    
+
             let position = stroke[i];
-    
+
             if (i == stroke.length - 1) {
                 //last gets up
                 bot.MoveTo(position.x, position.y, paperCorner.z);
@@ -313,9 +313,9 @@ function printRobot(bot) {
                 bot.MoveTo(position.x, position.y, paperCorner.z);
                 //console.log("bot.MoveTo("+position.x+", "+position.y+", "+paperCorner.z+");");
             }
-    
+
         }
-    
+
         bot.PopSettings();
 
     }
@@ -327,7 +327,7 @@ function printRobot(bot) {
     bot.Move(0, 0, 100);
 
     bot.Wait(1000);
-    
+
 }
 
 
