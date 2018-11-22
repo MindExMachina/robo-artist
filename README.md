@@ -12,3 +12,7 @@ Convert an image from your webcam to drawing tool paths and send them to machina
 - `c` toggle visibility of webcam
 - `m` toggle between `ABB` and `UR` robot make (helpful to simulate with RobotStudio)
 - `0` override current drawing with a test rectangle
+
+## Samples
+
+[See the portraits folder](https://github.com/MindExMachina/robo-artist/tree/master/portraits).
