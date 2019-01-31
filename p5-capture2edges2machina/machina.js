@@ -84,11 +84,11 @@ class Robot {
     }
 
     Tool(name, x, y, z, x0, x1, x2, y0, y1, y2, weightkg, gx, gy, gz) {
-        this.socket.send(`new Tool("${name}",${x},${y},${z},${x0},${x1},${x2},${y0},${y1},${y2},${weightkg},${gx},${gy},${gz});`);
+        this.socket.send(`DefineTool("${name}",${x},${y},${z},${x0},${x1},${x2},${y0},${y1},${y2},${weightkg},${gx},${gy},${gz});`);
     }
 
     Attach(toolName) {
-        this.socket.send(`Attach("${toolName}");`);
+        this.socket.send(`AttachTool("${toolName}");`);
     }
 
     Detach() {
